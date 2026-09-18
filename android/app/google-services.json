@@ -1,0 +1,30 @@
+
+{
+  "project_info": {
+    "project_number": "692075630804",
+    "project_id": "seva-cff3b",
+    "storage_bucket": "seva-cff3b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:692075630804:android:b25ae6201433d121336b41",
+        "android_client_info": {
+          "package_name": "com.example.hackthon2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvIbO0xaGxqWgqvnYkzHIby4CrvKWh3XA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
