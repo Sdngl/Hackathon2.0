@@ -46,7 +46,8 @@ class MedicineReminderService {
       requestSoundPermission: true,
     );
 
-    const settings = InitializationSettings(
+    const settings =
+    InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
     );
@@ -87,7 +88,8 @@ class MedicineReminderService {
           .resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin>();
 
-      return await iosPlugin?.requestPermissions(
+      return await iosPlugin
+          ?.requestPermissions(
         alert: true,
         badge: true,
         sound: true,
@@ -114,7 +116,8 @@ class MedicineReminderService {
       minute,
     );
 
-    final title = 'Medicine Reminder';
+    const title =
+        'Medicine Reminder';
 
     final medicineText = [
       medicineName,
@@ -123,7 +126,8 @@ class MedicineReminderService {
         strength.trim(),
     ].join(' ');
 
-    final body = label != null &&
+    final body =
+    label != null &&
         label.trim().isNotEmpty
         ? 'Time for $medicineText • ${label.trim()}'
         : 'Time for $medicineText';
@@ -135,7 +139,8 @@ class MedicineReminderService {
       scheduledDate: scheduledTime,
       notificationDetails:
       const NotificationDetails(
-        android: AndroidNotificationDetails(
+        android:
+        AndroidNotificationDetails(
           'medicine_reminders',
           'Medicine Reminders',
           channelDescription:
@@ -145,16 +150,19 @@ class MedicineReminderService {
           playSound: true,
           enableVibration: true,
           category:
-          AndroidNotificationCategory.reminder,
+          AndroidNotificationCategory
+              .reminder,
         ),
-        iOS: DarwinNotificationDetails(
+        iOS:
+        DarwinNotificationDetails(
           presentAlert: true,
           presentSound: true,
           presentBadge: true,
         ),
       ),
       androidScheduleMode:
-      AndroidScheduleMode.exactAllowWhileIdle,
+      AndroidScheduleMode
+          .exactAllowWhileIdle,
       matchDateTimeComponents:
       DateTimeComponents.time,
       payload: 'medicine_reminder',
@@ -200,7 +208,8 @@ class MedicineReminderService {
     );
   }
 
-  Future<void> cancelAllMedicineReminders() async {
+  Future<void>
+  cancelAllMedicineReminders() async {
     await initialize();
 
     await _notifications.cancelAll();

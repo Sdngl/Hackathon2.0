@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -5,35 +6,49 @@ import '../../navbar.dart';
 import '../../service/auth_service.dart';
 import '../../validators/validators.dart';
 
-
 import '../theme/apptheme.dart';
 import '../widgets/widget.dart';
 import 'signup.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({
+    super.key,
+  });
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginScreen> createState() =>
+      _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
+class _LoginScreenState
+    extends State<LoginScreen> {
+  final _formKey =
+  GlobalKey<FormState>();
 
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
+  final _emailCtrl =
+  TextEditingController();
 
-  final AuthService _auth = AuthService();
+  final _passwordCtrl =
+  TextEditingController();
+
+  final AuthService _auth =
+  AuthService();
 
   bool _loading = false;
+
   String? _error;
 
   @override
   void dispose() {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
+
     super.dispose();
   }
+
+  // =========================================================
+  // EMAIL LOGIN
+  // =========================================================
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) {
@@ -53,14 +68,22 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordCtrl.text,
       );
 
+      // Firebase ID Token
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        final token = await user.getIdToken(true);
+
+        debugPrint('');
+        debugPrint('================ FIREBASE ID TOKEN ================');
+        debugPrint(token);
+        debugPrint('===================================================');
+        debugPrint('');
+      }
+
       if (!mounted) return;
 
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (_) => const Navbar(0, true),
-        ),
-            (route) => false,
-      );
+      _goHome();
     } catch (e) {
       if (!mounted) return;
 
@@ -76,14 +99,72 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _resetPassword() async {
-    final email = _emailCtrl.text.trim();
+  // =========================================================
+  // GOOGLE LOGIN
+  // =========================================================
+
+  Future<void> _googleLogin() async {
+    if (_loading) return;
+
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      await _auth.signInWithGoogle();
+
+      if (!mounted) return;
+
+      _goHome();
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _error =
+            AuthService.describeError(e);
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  // =========================================================
+  // HOME
+  // =========================================================
+
+  void _goHome() {
+    Navigator.of(context)
+        .pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) =>
+        const Navbar(0, true),
+      ),
+          (route) => false,
+    );
+  }
+
+  // =========================================================
+  // RESET PASSWORD
+  // =========================================================
+
+  Future<void>
+  _resetPassword() async {
+    final email =
+    _emailCtrl.text.trim();
 
     if (email.isEmpty) {
       setState(() {
         _error =
         'Enter your email first, then tap Forgot password.';
       });
+
       return;
     }
 
@@ -92,11 +173,13 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await _auth.sendPasswordReset(email);
+      await _auth
+          .sendPasswordReset(email);
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
         SnackBar(
           content: Text(
             'Password reset link sent to $email',
@@ -107,136 +190,214 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       setState(() {
-        _error = AuthService.describeError(e);
+        _error =
+            AuthService.describeError(e);
       });
     }
   }
 
+  // =========================================================
+  // OPEN SIGNUP
+  // =========================================================
+
   void _openSignup() {
+    if (_loading) return;
+
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => const SignupScreen(),
+        builder: (_) =>
+        const SignupScreen(),
       ),
     );
   }
 
+  // =========================================================
+  // UI
+  // =========================================================
+
   @override
-  Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark,
+  Widget build(
+      BuildContext context,
+      ) {
+    return AnnotatedRegion<
+        SystemUiOverlayStyle>(
+      value:
+      SystemUiOverlayStyle.dark,
       child: Scaffold(
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+          child:
+          SingleChildScrollView(
+            padding:
+            const EdgeInsets.all(
+              24,
+            ),
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                CrossAxisAlignment
+                    .start,
                 children: [
                   const AuthHeader(
-                    title: 'Welcome Back',
+                    title:
+                    'Welcome Back',
                     subtitle:
                     'Sign in to continue your personalized health journey',
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(
+                    height: 24,
+                  ),
 
                   AuthCard(
                     child: Column(
                       crossAxisAlignment:
-                      CrossAxisAlignment.stretch,
+                      CrossAxisAlignment
+                          .stretch,
                       children: [
                         AppTextField(
-                          label: 'Email or Phone',
-                          hint: 'name@example.com',
-                          icon: Icons.mail_outline_rounded,
-                          controller: _emailCtrl,
+                          label:
+                          'Email',
+                          hint:
+                          'name@example.com',
+                          icon: Icons
+                              .mail_outline_rounded,
+                          controller:
+                          _emailCtrl,
                           keyboardType:
-                          TextInputType.emailAddress,
-                          validator: Validators.email,
+                          TextInputType
+                              .emailAddress,
+                          validator:
+                          Validators
+                              .email,
                         ),
 
-                        const SizedBox(height: 18),
+                        const SizedBox(
+                          height: 18,
+                        ),
 
                         AppTextField(
-                          label: 'Password',
-                          hint: '••••••••',
-                          icon: Icons.lock_outline_rounded,
-                          isPassword: true,
-                          controller: _passwordCtrl,
+                          label:
+                          'Password',
+                          hint:
+                          '••••••••',
+                          icon: Icons
+                              .lock_outline_rounded,
+                          isPassword:
+                          true,
+                          controller:
+                          _passwordCtrl,
                           textInputAction:
-                          TextInputAction.done,
-                          validator: Validators.password,
+                          TextInputAction
+                              .done,
+                          validator:
+                          Validators
+                              .password,
                         ),
 
                         Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: _loading
+                          alignment:
+                          Alignment
+                              .centerRight,
+                          child:
+                          TextButton(
+                            onPressed:
+                            _loading
                                 ? null
                                 : _resetPassword,
-                            style: TextButton.styleFrom(
+                            style:
+                            TextButton
+                                .styleFrom(
                               padding:
-                              const EdgeInsets.symmetric(
-                                vertical: 14,
+                              const EdgeInsets
+                                  .symmetric(
+                                vertical:
+                                14,
                               ),
                               foregroundColor:
-                              AppColors.primary,
+                              AppColors
+                                  .primary,
                             ),
-                            child: const Text(
+                            child:
+                            const Text(
                               'Forgot password?',
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w700,
+                              style:
+                              TextStyle(
+                                fontSize:
+                                13.5,
+                                fontWeight:
+                                FontWeight
+                                    .w700,
                               ),
                             ),
                           ),
                         ),
 
-                        if (_error != null) ...[
+                        if (_error !=
+                            null) ...[
                           Text(
                             _error!,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Theme.of(context)
+                            textAlign:
+                            TextAlign
+                                .center,
+                            style:
+                            TextStyle(
+                              fontSize:
+                              13,
+                              color: Theme.of(
+                                  context)
                                   .colorScheme
                                   .error,
                             ),
                           ),
-
-                          const SizedBox(height: 12),
+                          const SizedBox(
+                            height: 12,
+                          ),
                         ],
 
                         PrimaryButton(
-                          text: 'Log In',
-                          loading: _loading,
-                          onPressed: _login,
+                          text:
+                          'Log In',
+                          loading:
+                          _loading,
+                          onPressed:
+                          _login,
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(
+                    height: 32,
+                  ),
 
                   const OrDivider(
-                    text: 'or log in with',
+                    text:
+                    'or log in with',
                   ),
 
-                  const SizedBox(height: 22),
+                  const SizedBox(
+                    height: 22,
+                  ),
 
                   GoogleButton(
-                    onPressed: () {
-                      // Google login can be connected later.
-                    },
+                    onPressed:
+                    _loading
+                        ? null
+                        : _googleLogin,
                   ),
 
-                  const SizedBox(height: 36),
+                  const SizedBox(
+                    height: 36,
+                  ),
 
                   AuthFooter(
-                    question: "Don't have an account?",
-                    action: 'Sign Up',
-                    onTap: _openSignup,
+                    question:
+                    "Don't have an account?",
+                    action:
+                    'Sign Up',
+                    onTap:
+                    _openSignup,
                   ),
                 ],
               ),

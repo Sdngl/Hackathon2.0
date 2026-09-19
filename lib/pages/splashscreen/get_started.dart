@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../auth/login.dart';
+import '../auth/signup.dart';
 import '../theme/apptheme.dart';
 import '../widgets/widget.dart';
 
@@ -52,14 +53,12 @@ class GetStartedScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      const _PageIndicator(count: 3, current: 0),
-                      const Spacer(),
                       const SizedBox(height: 20),
                       PrimaryButton(
                         text: 'Get Started',
                         onPressed: () => Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
-                            builder: (_) => const LoginScreen(),
+                            builder: (_) => const SignupScreen(),
                           ),
                         )
                       ),

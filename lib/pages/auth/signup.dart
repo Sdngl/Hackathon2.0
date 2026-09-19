@@ -1,29 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../navbar.dart';
 import '../../service/auth_service.dart';
 import '../../validators/validators.dart';
+
 import '../theme/apptheme.dart';
 import '../widgets/widget.dart';
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+  const SignupScreen({
+    super.key,
+  });
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<SignupScreen> createState() =>
+      _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
-  final _formKey = GlobalKey<FormState>();
+class _SignupScreenState
+    extends State<SignupScreen> {
+  final _formKey =
+  GlobalKey<FormState>();
 
-  final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-  final _confirmCtrl = TextEditingController();
+  final _nameCtrl =
+  TextEditingController();
 
-  final AuthService _auth = AuthService();
+  final _emailCtrl =
+  TextEditingController();
+
+  final _passwordCtrl =
+  TextEditingController();
+
+  final _confirmCtrl =
+  TextEditingController();
+
+  final AuthService _auth =
+  AuthService();
 
   bool _loading = false;
+
   String? _error;
 
   @override
@@ -32,12 +48,13 @@ class _SignupScreenState extends State<SignupScreen> {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
     _confirmCtrl.dispose();
+
     super.dispose();
   }
 
-  // ---------------------------------------------------------
-  // REGISTER
-  // ---------------------------------------------------------
+  // =========================================================
+  // EMAIL REGISTER
+  // =========================================================
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) {
@@ -53,23 +70,23 @@ class _SignupScreenState extends State<SignupScreen> {
 
     try {
       await _auth.signUp(
-        email: _emailCtrl.text.trim(),
-        password: _passwordCtrl.text,
-        displayName: _nameCtrl.text.trim(),
+        email:
+        _emailCtrl.text.trim(),
+        password:
+        _passwordCtrl.text,
+        displayName:
+        _nameCtrl.text.trim(),
       );
 
       if (!mounted) return;
 
-      // Keeps the behavior from your existing signup screen.
-      // The first/root screen can now detect the signed-in user.
-      Navigator.of(context).popUntil(
-            (route) => route.isFirst,
-      );
+      _goHome();
     } catch (e) {
       if (!mounted) return;
 
       setState(() {
-        _error = AuthService.describeError(e);
+        _error =
+            AuthService.describeError(e);
       });
     } finally {
       if (mounted) {
@@ -80,9 +97,64 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  // ---------------------------------------------------------
+  // =========================================================
+  // GOOGLE SIGNUP
+  // =========================================================
+
+  Future<void> _googleSignup() async {
+    if (_loading) return;
+
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      // Same Google method handles both:
+      //
+      // New Google account -> signup
+      // Existing account   -> login
+      await _auth.signInWithGoogle();
+
+      if (!mounted) return;
+
+      _goHome();
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _error =
+            AuthService.describeError(e);
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  // =========================================================
+  // HOME
+  // =========================================================
+
+  void _goHome() {
+    Navigator.of(context)
+        .pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) =>
+        const Navbar(0, true),
+      ),
+          (route) => false,
+    );
+  }
+
+  // =========================================================
   // BACK TO LOGIN
-  // ---------------------------------------------------------
+  // =========================================================
 
   void _openLogin() {
     if (_loading) return;
@@ -90,119 +162,140 @@ class _SignupScreenState extends State<SignupScreen> {
     Navigator.of(context).pop();
   }
 
-  // ---------------------------------------------------------
+  // =========================================================
   // UI
-  // ---------------------------------------------------------
+  // =========================================================
 
   @override
-  Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark,
+  Widget build(
+      BuildContext context,
+      ) {
+    return AnnotatedRegion<
+        SystemUiOverlayStyle>(
+      value:
+      SystemUiOverlayStyle.dark,
       child: Scaffold(
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+          child:
+          SingleChildScrollView(
+            padding:
+            const EdgeInsets.all(
+              24,
+            ),
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                CrossAxisAlignment
+                    .start,
                 children: [
-                  // -----------------------------------------
-                  // HEADER
-                  // -----------------------------------------
-
                   const AuthHeader(
-                    title: 'Create Account',
+                    title:
+                    'Create Account',
                     subtitle:
                     'Start tracking vitals and scanning reports today',
                   ),
 
-                  const SizedBox(height: 20),
-
-                  // -----------------------------------------
-                  // REGISTER CARD
-                  // -----------------------------------------
+                  const SizedBox(
+                    height: 20,
+                  ),
 
                   AuthCard(
                     child: Column(
                       crossAxisAlignment:
-                      CrossAxisAlignment.stretch,
+                      CrossAxisAlignment
+                          .stretch,
                       children: [
-                        // -----------------------------------
-                        // FULL NAME
-                        // -----------------------------------
-
                         AppTextField(
-                          label: 'Full Name',
-                          hint: 'Aarya Sharma',
-                          icon:
-                          Icons.person_outline_rounded,
-                          controller: _nameCtrl,
+                          label:
+                          'Full Name',
+                          hint:
+                          'Aarya Sharma',
+                          icon: Icons
+                              .person_outline_rounded,
+                          controller:
+                          _nameCtrl,
                           keyboardType:
-                          TextInputType.name,
+                          TextInputType
+                              .name,
                           validator:
-                          Validators.required(
+                          Validators
+                              .required(
                             'Please enter your name',
                           ),
                         ),
 
-                        const SizedBox(height: 16),
-
-                        // -----------------------------------
-                        // EMAIL
-                        // -----------------------------------
+                        const SizedBox(
+                          height: 16,
+                        ),
 
                         AppTextField(
-                          label: 'Email',
-                          hint: 'aarya@gmail.com',
-                          icon:
-                          Icons.mail_outline_rounded,
-                          controller: _emailCtrl,
+                          label:
+                          'Email',
+                          hint:
+                          'aarya@gmail.com',
+                          icon: Icons
+                              .mail_outline_rounded,
+                          controller:
+                          _emailCtrl,
                           keyboardType:
-                          TextInputType.emailAddress,
-                          validator: Validators.email,
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // -----------------------------------
-                        // PASSWORD
-                        // -----------------------------------
-
-                        AppTextField(
-                          label: 'Password',
-                          hint: '••••••••',
-                          icon:
-                          Icons.lock_outline_rounded,
-                          isPassword: true,
-                          controller: _passwordCtrl,
+                          TextInputType
+                              .emailAddress,
                           validator:
-                          Validators.password,
+                          Validators
+                              .email,
                         ),
 
-                        const SizedBox(height: 16),
-
-                        // -----------------------------------
-                        // CONFIRM PASSWORD
-                        // -----------------------------------
+                        const SizedBox(
+                          height: 16,
+                        ),
 
                         AppTextField(
-                          label: 'Confirm Password',
-                          hint: '••••••••',
-                          icon:
-                          Icons.lock_outline_rounded,
-                          isPassword: true,
-                          controller: _confirmCtrl,
+                          label:
+                          'Password',
+                          hint:
+                          '••••••••',
+                          icon: Icons
+                              .lock_outline_rounded,
+                          isPassword:
+                          true,
+                          controller:
+                          _passwordCtrl,
+                          validator:
+                          Validators
+                              .password,
+                        ),
+
+                        const SizedBox(
+                          height: 16,
+                        ),
+
+                        AppTextField(
+                          label:
+                          'Confirm Password',
+                          hint:
+                          '••••••••',
+                          icon: Icons
+                              .lock_outline_rounded,
+                          isPassword:
+                          true,
+                          controller:
+                          _confirmCtrl,
                           textInputAction:
-                          TextInputAction.done,
-                          validator: (value) {
-                            if (value == null ||
-                                value.isEmpty) {
+                          TextInputAction
+                              .done,
+                          validator:
+                              (value) {
+                            if (value ==
+                                null ||
+                                value
+                                    .isEmpty) {
                               return 'Confirm your password';
                             }
 
                             if (value !=
-                                _passwordCtrl.text) {
+                                _passwordCtrl
+                                    .text) {
                               return 'Passwords do not match';
                             }
 
@@ -210,107 +303,112 @@ class _SignupScreenState extends State<SignupScreen> {
                           },
                         ),
 
-                        const SizedBox(height: 14),
-
-                        // -----------------------------------
-                        // PRIVACY MESSAGE
-                        // -----------------------------------
+                        const SizedBox(
+                          height: 14,
+                        ),
 
                         const Row(
                           crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                          CrossAxisAlignment
+                              .start,
                           children: [
                             Icon(
-                              Icons.shield_outlined,
+                              Icons
+                                  .shield_outlined,
                               size: 16,
                               color:
-                              AppColors.primary,
+                              AppColors
+                                  .primary,
                             ),
-
-                            SizedBox(width: 6),
-
+                            SizedBox(
+                              width: 6,
+                            ),
                             Expanded(
-                              child: Text(
+                              child:
+                              Text(
                                 'Your medical data is encrypted on device.',
-                                style: TextStyle(
-                                  fontSize: 12.5,
+                                style:
+                                TextStyle(
+                                  fontSize:
+                                  12.5,
                                   color:
-                                  AppColors.label,
+                                  AppColors
+                                      .label,
                                 ),
                               ),
                             ),
                           ],
                         ),
 
-                        // -----------------------------------
-                        // FIREBASE ERROR
-                        // -----------------------------------
-
-                        if (_error != null) ...[
-                          const SizedBox(height: 14),
-
+                        if (_error !=
+                            null) ...[
+                          const SizedBox(
+                            height: 14,
+                          ),
                           Text(
                             _error!,
                             textAlign:
-                            TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Theme.of(context)
+                            TextAlign
+                                .center,
+                            style:
+                            TextStyle(
+                              fontSize:
+                              13,
+                              color: Theme.of(
+                                  context)
                                   .colorScheme
                                   .error,
                             ),
                           ),
                         ],
 
-                        const SizedBox(height: 14),
-
-                        // -----------------------------------
-                        // CREATE ACCOUNT BUTTON
-                        // -----------------------------------
+                        const SizedBox(
+                          height: 14,
+                        ),
 
                         PrimaryButton(
-                          text: 'Create Account',
-                          loading: _loading,
-                          onPressed: _register,
+                          text:
+                          'Create Account',
+                          loading:
+                          _loading,
+                          onPressed:
+                          _register,
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 32),
-
-                  // -----------------------------------------
-                  // DIVIDER
-                  // -----------------------------------------
+                  const SizedBox(
+                    height: 32,
+                  ),
 
                   const OrDivider(
-                    text: 'or sign up with',
+                    text:
+                    'or sign up with',
                   ),
 
-                  const SizedBox(height: 22),
-
-                  // -----------------------------------------
-                  // GOOGLE
-                  // -----------------------------------------
+                  const SizedBox(
+                    height: 22,
+                  ),
 
                   GoogleButton(
-                    onPressed: () {
-                      // Google authentication can be
-                      // connected later.
-                    },
+                    onPressed:
+                    _loading
+                        ? null
+                        : _googleSignup,
                   ),
 
-                  const SizedBox(height: 32),
-
-                  // -----------------------------------------
-                  // LOGIN
-                  // -----------------------------------------
+                  const SizedBox(
+                    height: 32,
+                  ),
 
                   AuthFooter(
                     question:
                     'Already have an account?',
-                    action: 'Log In',
-                    onTap: _openLogin,
+                    action:
+                    'Log In',
+                    onTap:
+                    _openLogin,
                   ),
                 ],
               ),
