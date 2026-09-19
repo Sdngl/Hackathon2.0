@@ -36,6 +36,9 @@ const pillColors = {
   Cancelled: "bg-red-50 text-red-600",
   Confirmed: "bg-brand-50 text-brand-700",
   Verified: "bg-blue-50 text-blue-600",
+  Plus: "bg-violet-50 text-violet-600",
+  Free: "bg-gray-100 text-gray-600",
+  Expired: "bg-red-50 text-red-600",
 };
 
 export function StatusPill({ status, className = "" }) {

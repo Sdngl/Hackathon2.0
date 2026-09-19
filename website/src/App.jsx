@@ -5,14 +5,25 @@ import AdminLogin from "../src/pages/admin/Login";
 import Overview from "../src/pages/admin/Overview";
 import DoctorsPage from "../src/pages/admin/DoctorsPage";
 import DoctorDetail from "../src/pages/admin/DoctorDetail";
-import AppointmentsPage from "../src/pages/admin/AppointmentsPage";
+import AppointmentsPage from "./pages/admin/AppointmentsPage";
+import UsersPage from "../src/pages/admin/UsersPage";
+import UserDetail from "../src/pages/admin/UserDetail";
+import ClinicsPage from "../src/pages/admin/ClinicsPage";
+import SubscriptionsPage from "../src/pages/admin/SubscriptionsPage";
+import ScansPage from "../src/pages/admin/ScansPage";
+import SuggestionRulesPage from "../src/pages/admin/SuggestionRulesPage";
 import ComingSoon from "../src/pages/admin/ComingSoon";
-import AdminLayout from "../src/components/admin/AdminLayout";
-import ProtectedRoute from "../src/components/ProtectedRoute";
-import { adminNav } from "../src/components/admin/navItems";
+import AdminLayout from "./components/admin/AdminLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { adminNav } from "./components/admin/navItems";
 
 // Sidebar pages that are built. Anything not listed here shows "Coming soon".
 const builtPages = {
+  users: <UsersPage />,
+  clinics: <ClinicsPage />,
+  subscriptions: <SubscriptionsPage />,
+  scans: <ScansPage />,
+  "suggestion-rules": <SuggestionRulesPage />,
   doctors: <DoctorsPage />,
   appointments: <AppointmentsPage />,
 };
@@ -33,6 +44,7 @@ export default function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Overview />} />
           <Route path="doctors/:id" element={<DoctorDetail />} />
+          <Route path="users/:id" element={<UserDetail />} />
           {adminNav
             .filter((item) => item.path !== "")
             .map((item) => (
