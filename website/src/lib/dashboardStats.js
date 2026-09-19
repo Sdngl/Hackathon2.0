@@ -24,19 +24,19 @@ export function isActivePlus(user, now = new Date()) {
   return !expires || expires > now;
 }
 
-export function getUserStats(users) {
+export function getUserStats(users, days = 30) {
   const now = new Date();
   const dayAgo = new Date(now - DAY);
-  const monthAgo = new Date(now - 30 * DAY);
+  const periodStart = new Date(now - days * DAY);
 
   const activeToday = users.filter(
     (u) => toDate(u.lastLoginAt) >= dayAgo,
   ).length;
   const plusUsers = users.filter((u) => isActivePlus(u, now));
 
-  // Revenue = subscriptions started in the last 30 days
+  // Revenue = subscriptions started in the selected period (the top bar's date picker)
   const recentPayments = users.filter(
-    (u) => u.isPaid && toDate(u.subscriptionStartedAt) >= monthAgo,
+    (u) => u.isPaid && toDate(u.subscriptionStartedAt) >= periodStart,
   );
   const revenue = recentPayments.reduce(
     (sum, u) => sum + (Number(u.subscriptionPrice) || 0),
@@ -74,7 +74,7 @@ export function getPlanBreakdown(users) {
     }));
 }
 
-// Running totals of users and Plus subscribers for each of the last 30 days
+// Running totals of users and Plus subscribers for each of the last `days` days
 export function getGrowth(users, days = 30) {
   const created = users.map((u) => toDate(u.createdAt)).filter(Boolean);
   const subscribed = users

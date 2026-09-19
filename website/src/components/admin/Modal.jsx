@@ -2,7 +2,14 @@ import { useEffect } from "react";
 import { X } from "lucide-react";
 
 // Centered pop-up. Closes on the X, the Escape key, or clicking the dark background.
-export default function Modal({ title, onClose, children, footer }) {
+// Pass `wide` for bigger forms.
+export default function Modal({
+  title,
+  onClose,
+  children,
+  footer,
+  wide = false,
+}) {
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -18,7 +25,7 @@ export default function Modal({ title, onClose, children, footer }) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+        className={`w-full ${wide ? "max-w-2xl" : "max-w-md"} rounded-3xl bg-white p-6 shadow-2xl`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">

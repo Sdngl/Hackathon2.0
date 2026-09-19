@@ -1,17 +1,20 @@
 import { Navigate, Route, Routes } from "react-router";
 import Landing from "../src/pages/Landing";
-import PortalSelect from "../src/pages/PortalSelect";
+import PortalSelect from "./pages/PortalSelect";
 import AdminLogin from "../src/pages/admin/Login";
 import Overview from "../src/pages/admin/Overview";
 import DoctorsPage from "../src/pages/admin/DoctorsPage";
 import DoctorDetail from "../src/pages/admin/DoctorDetail";
-import AppointmentsPage from "./pages/admin/AppointmentsPage";
+import AppointmentsPage from "../src/pages/admin/AppointmentsPage";
 import UsersPage from "../src/pages/admin/UsersPage";
 import UserDetail from "../src/pages/admin/UserDetail";
 import ClinicsPage from "../src/pages/admin/ClinicsPage";
 import SubscriptionsPage from "../src/pages/admin/SubscriptionsPage";
 import ScansPage from "../src/pages/admin/ScansPage";
 import SuggestionRulesPage from "../src/pages/admin/SuggestionRulesPage";
+import ContentPage from "../src/pages/admin/ContentPage";
+import NotificationsPage from "../src/pages/admin/NotificationsPage";
+import SettingsPage from "../src/pages/admin/SettingsPage";
 import ComingSoon from "../src/pages/admin/ComingSoon";
 import AdminLayout from "./components/admin/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -24,6 +27,9 @@ const builtPages = {
   subscriptions: <SubscriptionsPage />,
   scans: <ScansPage />,
   "suggestion-rules": <SuggestionRulesPage />,
+  content: <ContentPage />,
+  notifications: <NotificationsPage />,
+  settings: <SettingsPage />,
   doctors: <DoctorsPage />,
   appointments: <AppointmentsPage />,
 };

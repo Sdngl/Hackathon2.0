@@ -2,7 +2,7 @@ import { CreditCard, Stethoscope, Users, Wallet } from "lucide-react";
 
 const npr = (n) => `Rs. ${n.toLocaleString("en-IN")}`;
 
-export default function StatCards({ userStats, doctorStats }) {
+export default function StatCards({ userStats, doctorStats, days = 30 }) {
   const cards = [
     {
       label: "Daily Active Users",
@@ -20,7 +20,7 @@ export default function StatCards({ userStats, doctorStats }) {
       tint: "bg-blue-50 text-blue-600",
     },
     {
-      label: "Revenue (30 days)",
+      label: `Revenue (${days} days)`,
       value: npr(userStats.revenue),
       note: `${userStats.paymentsCount} payments`,
       icon: Wallet,

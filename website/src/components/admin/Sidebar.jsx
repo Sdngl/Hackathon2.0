@@ -3,9 +3,11 @@ import { LogOut } from "lucide-react";
 import Logo from "../Logo";
 import { adminNav } from "./navItems";
 import { useAuth } from "../../context/AuthContext";
+import { useAdmin } from "../../context/AdminContext";
 
 export default function Sidebar({ open, onClose }) {
   const { user, logout } = useAuth();
+  const { unreadCount } = useAdmin();
   const name = user?.displayName || "Admin";
   const initials = name
     .split(" ")
@@ -34,29 +36,39 @@ export default function Sidebar({ open, onClose }) {
         </div>
 
         <nav className="mt-8 flex-1 space-y-1 overflow-y-auto">
-          {adminNav.map(({ label, path, icon: Icon, badge }) => (
-            <NavLink
-              key={label}
-              to={path ? `/admin/${path}` : "/admin"}
-              end={path === ""}
-              onClick={onClose}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
-                  isActive
-                    ? "bg-brand-50 font-semibold text-brand-700"
-                    : "text-gray-600 hover:bg-mist hover:text-ink"
-                }`
-              }
-            >
-              <Icon size={18} />
-              <span className="flex-1">{label}</span>
-              {badge && (
-                <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">
-                  {badge}
-                </span>
-              )}
-            </NavLink>
-          ))}
+          {adminNav.map(({ label, path, icon: Icon }) => {
+            // live unread count from the notification feed
+            const badge =
+              path === "notifications" && unreadCount > 0
+                ? unreadCount > 99
+                  ? "99+"
+                  : unreadCount
+                : null;
+
+            return (
+              <NavLink
+                key={label}
+                to={path ? `/admin/${path}` : "/admin"}
+                end={path === ""}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
+                    isActive
+                      ? "bg-brand-50 font-semibold text-brand-700"
+                      : "text-gray-600 hover:bg-mist hover:text-ink"
+                  }`
+                }
+              >
+                <Icon size={18} />
+                <span className="flex-1">{label}</span>
+                {badge && (
+                  <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                    {badge}
+                  </span>
+                )}
+              </NavLink>
+            );
+          })}
         </nav>
 
         <div className="mt-4 flex items-center gap-3 rounded-2xl bg-mist p-3">

@@ -1,5 +1,6 @@
 import { LoaderCircle } from "lucide-react";
 import useDashboardData from "../../hooks/useDashboardData";
+import { useAdmin } from "../../context/AdminContext";
 import StatCards from "../../components/admin/StatCards";
 import ActivityChart from "../../components/admin/ActivityChart";
 import PlansDonut from "../../components/admin/PlansDonut";
@@ -9,6 +10,7 @@ import DoctorQueue from "../../components/admin/DoctorQueue";
 import Consultations from "../../components/admin/Consultations";
 
 export default function Overview() {
+  const { rangeDays } = useAdmin(); // from the date picker in the top bar
   const {
     userStats,
     plans,
@@ -20,7 +22,7 @@ export default function Overview() {
     loading,
     error,
     scansError,
-  } = useDashboardData();
+  } = useDashboardData(rangeDays);
 
   if (loading) {
     return (
@@ -41,10 +43,14 @@ export default function Overview() {
 
   return (
     <div className="space-y-5">
-      <StatCards userStats={userStats} doctorStats={doctorStats} />
+      <StatCards
+        userStats={userStats}
+        doctorStats={doctorStats}
+        days={rangeDays}
+      />
 
       <div className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
-        <ActivityChart data={growth} />
+        <ActivityChart data={growth} days={rangeDays} />
         <PlansDonut plans={plans} total={userStats.plusCount} />
       </div>
 

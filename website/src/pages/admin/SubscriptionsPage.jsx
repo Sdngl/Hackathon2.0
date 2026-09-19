@@ -19,6 +19,7 @@ import {
   Wallet,
 } from "lucide-react";
 import useCollection from "../../hooks/useCollection";
+import { useAdmin } from "../../context/AdminContext";
 import { Avatar, Card } from "../../components/admin/ui";
 import MiniStat from "../../components/admin/MiniStat";
 import Pagination from "../../components/admin/Pagination";
@@ -46,11 +47,11 @@ const stateStyle = {
   Expired: "bg-red-50 text-red-600",
 };
 
-function RevenueChart({ data }) {
+function RevenueChart({ data, days }) {
   return (
     <Card
       title="Daily revenue"
-      subtitle="New subscriptions over the last 30 days"
+      subtitle={`New subscriptions over the last ${days} days`}
     >
       <div className="mt-4 h-64">
         <ResponsiveContainer width="100%" height="100%">
@@ -68,7 +69,7 @@ function RevenueChart({ data }) {
               tickLine={false}
               axisLine={false}
               fontSize={11}
-              interval={4}
+              interval={Math.max(0, Math.ceil(days / 7) - 1)}
               tick={{ fill: "#6b7280" }}
             />
             <YAxis
@@ -140,17 +141,18 @@ function PlansCard({ plans }) {
 // /admin/subscriptions
 export default function SubscriptionsPage() {
   const { data: users, loading, error } = useCollection("users");
+  const { rangeDays } = useAdmin(); // from the date picker in the top bar
   const [includeTest, setIncludeTest] = useState(true);
   const [state, setState] = useState("all");
   const [page, setPage] = useState(1);
 
   const stats = useMemo(
-    () => getRevenueStats(users, includeTest),
-    [users, includeTest],
+    () => getRevenueStats(users, includeTest, rangeDays),
+    [users, includeTest, rangeDays],
   );
   const chart = useMemo(
-    () => dailyRevenue(users, includeTest),
-    [users, includeTest],
+    () => dailyRevenue(users, includeTest, rangeDays),
+    [users, includeTest, rangeDays],
   );
   const plans = useMemo(
     () => planTable(users, includeTest),
@@ -204,9 +206,9 @@ export default function SubscriptionsPage() {
         />
         <MiniStat
           icon={TrendingUp}
-          label="Last 30 days"
-          value={npr(stats.month)}
-          note={`${stats.monthCount} subscriptions · ${npr(stats.lifetime)} all time`}
+          label={`Last ${rangeDays} days`}
+          value={npr(stats.period)}
+          note={`${stats.periodCount} subscriptions · ${npr(stats.lifetime)} all time`}
           tint="bg-blue-50 text-blue-600"
         />
         <MiniStat
@@ -258,7 +260,7 @@ export default function SubscriptionsPage() {
       )}
 
       <div className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
-        <RevenueChart data={chart} />
+        <RevenueChart data={chart} days={rangeDays} />
         <PlansCard plans={plans} />
       </div>
 

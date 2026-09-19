@@ -27,11 +27,11 @@ export function subscriptionState(u, now = new Date()) {
   return "Active";
 }
 
-export function getRevenueStats(users, includeTest) {
+export function getRevenueStats(users, includeTest, days = 30) {
   const paid = paidUsers(users, includeTest);
   const now = new Date();
   const today = startOfToday();
-  const monthAgo = new Date(now - 30 * DAY);
+  const periodStart = new Date(now - days * DAY);
   const startedSince = (since) =>
     paid.filter((u) => toDate(u.subscriptionStartedAt) >= since);
   const sum = (list) => list.reduce((total, u) => total + price(u), 0);
@@ -42,8 +42,8 @@ export function getRevenueStats(users, includeTest) {
   return {
     today: sum(startedSince(today)),
     todayCount: startedSince(today).length,
-    month: sum(startedSince(monthAgo)),
-    monthCount: startedSince(monthAgo).length,
+    period: sum(startedSince(periodStart)),
+    periodCount: startedSince(periodStart).length,
     lifetime: sum(paid),
     active: active.length,
     mrr: Math.round(active.reduce((total, u) => total + monthlyValue(u), 0)),

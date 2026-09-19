@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -11,6 +17,8 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  // bumps after the profile changes (e.g. new display name) so the UI re-renders
+  const [, refreshUser] = useReducer((n) => n + 1, 0);
 
   // Firebase remembers the session, so a page refresh keeps you logged in
   useEffect(() => {
@@ -39,7 +47,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAdmin, loading, loginAdmin, logout }}
+      value={{ user, isAdmin, loading, loginAdmin, logout, refreshUser }}
     >
       {children}
     </AuthContext.Provider>
