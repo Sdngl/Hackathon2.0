@@ -1,18 +1,56 @@
 import { useMemo, useState } from "react";
-import { Building, Video } from "lucide-react";
+import { Building, CalendarPlus, FileText, Video } from "lucide-react";
 import { Avatar, Card, StatusPill } from "../admin/ui";
 import Pagination from "../admin/Pagination";
 import Tabs from "../admin/Tabs";
 import StatusModal from "../admin/StatusModal";
-import { filterAppointments } from "../../lib/appointments";
+import ReportViewer from "./ReportViewer";
+import ScheduleModal from "./ScheduleModal";
+import { useDoctor } from "../../context/DoctorContext";
+import { filterAppointments, needsDate } from "../../lib/appointments";
 
 const FILTERS = [
   { key: "today", label: "Today" },
   { key: "upcoming", label: "Upcoming" },
+  { key: "unscheduled", label: "Needs a date" },
   { key: "all", label: "All" },
 ];
 
-// This doctor's appointments with Today / Upcoming / All and a Manage pop-up
+function When({ a, today, onSchedule }) {
+  if (needsDate(a)) {
+    return (
+      <span className="flex flex-col items-start gap-1">
+        <button
+          onClick={onSchedule}
+          className="flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-100"
+        >
+          <CalendarPlus size={13} /> Set date &amp; time
+        </button>
+        {a.bookedLabel && (
+          <span className="text-xs text-gray-400">
+            Requested {a.bookedLabel}
+          </span>
+        )}
+      </span>
+    );
+  }
+  if (!a.date) return <span className="text-gray-400">No date</span>;
+  return (
+    <span className="group flex flex-col items-start">
+      <span className="font-medium">
+        {today ? a.time : `${a.dateLabel} · ${a.time}`}
+      </span>
+      <button
+        onClick={onSchedule}
+        className="text-xs text-gray-400 hover:text-brand-700 hover:underline"
+      >
+        Reschedule
+      </button>
+    </span>
+  );
+}
+
+// This doctor's appointments with Today / Upcoming / All, shared reports and a Manage pop-up
 export default function AppointmentsTable({
   appointments,
   initialFilter = "today",
@@ -23,6 +61,9 @@ export default function AppointmentsTable({
   const [filter, setFilter] = useState(initialFilter);
   const [page, setPage] = useState(1);
   const [managing, setManaging] = useState(null);
+  const [viewing, setViewing] = useState(null);
+  const [scheduling, setScheduling] = useState(null);
+  const { doctor } = useDoctor();
 
   const list = useMemo(
     () => filterAppointments([...appointments], filter),
@@ -55,13 +96,14 @@ export default function AppointmentsTable({
         </p>
       ) : (
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="border-b border-black/5 text-xs text-gray-500">
               <tr>
                 {[
                   "Patient",
                   filter === "today" ? "Time" : "Date & time",
                   "Type",
+                  "Report",
                   "Status",
                   "",
                 ].map((h) => (
@@ -84,16 +126,32 @@ export default function AppointmentsTable({
                         {a.patient}
                       </span>
                     </td>
-                    <td className="font-medium">
-                      {filter === "today"
-                        ? a.time
-                        : `${a.dateLabel} · ${a.time}`}
+                    <td className="py-2">
+                      <When
+                        a={a}
+                        today={filter === "today"}
+                        onSchedule={() => setScheduling(a)}
+                      />
                     </td>
                     <td className="text-gray-600">
                       <span className="flex items-center gap-2">
                         <TypeIcon size={15} />
                         {a.type}
                       </span>
+                    </td>
+                    <td>
+                      {a.reportId ? (
+                        <button
+                          onClick={() => setViewing(a)}
+                          className="flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                        >
+                          <FileText size={13} /> View report
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-400">
+                          None shared
+                        </span>
+                      )}
                     </td>
                     <td>
                       <StatusPill status={a.status} />
@@ -115,13 +173,27 @@ export default function AppointmentsTable({
             <p className="py-10 text-center text-sm text-gray-500">
               {filter === "today"
                 ? "No appointments today."
-                : "No appointments here yet."}
+                : filter === "unscheduled"
+                  ? "No requests waiting for a date."
+                  : "No appointments here yet."}
             </p>
           )}
         </div>
       )}
       {managing && (
         <StatusModal appointment={managing} onClose={() => setManaging(null)} />
+      )}
+      {viewing && (
+        <ReportViewer appointment={viewing} onClose={() => setViewing(null)} />
+      )}
+      {scheduling && (
+        <ScheduleModal
+          appointment={scheduling}
+          slots={
+            Array.isArray(doctor.availableSlots) ? doctor.availableSlots : []
+          }
+          onClose={() => setScheduling(null)}
+        />
       )}
     </Card>
   );

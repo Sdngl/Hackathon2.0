@@ -7,6 +7,7 @@ import WeekChart from "../../components/doctor/WeekChart";
 import AppointmentsTable from "../../components/doctor/AppointmentsTable";
 import AvailabilityCard from "../../components/doctor/AvailabilityCard";
 import ProfileCompleteness from "../../components/doctor/ProfileCompleteness";
+import DateRequests from "../../components/doctor/DateRequests";
 import { getDoctorOverview, nextSevenDays } from "../../lib/doctorStats";
 
 // /doctor
@@ -17,6 +18,8 @@ export default function DoctorOverview() {
 
   return (
     <div className="space-y-5">
+      <DateRequests appointments={appointments} />
+
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <MiniStat
           icon={CalendarDays}

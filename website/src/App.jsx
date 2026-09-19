@@ -19,9 +19,10 @@ import NotificationsPage from "../src/pages/admin/NotificationsPage";
 import SettingsPage from "../src/pages/admin/SettingsPage";
 import ComingSoon from "../src/pages/admin/ComingSoon";
 import DoctorLogin from "../src/pages/doctor/Login";
-import DoctorOverview from "./pages/doctor/Overview";
+import DoctorOverview from "../src/pages/doctor/overview";
 import DoctorAppointmentsPage from "../src/pages/doctor/AppointmentsPage";
 import DoctorPatientsPage from "../src/pages/doctor/PatientsPage";
+import DoctorReportsPage from "../src/pages/doctor/ReportsPage";
 import DoctorAvailabilityPage from "../src/pages/doctor/AvailabilityPage";
 import DoctorProfilePage from "../src/pages/doctor/ProfilePage";
 import DoctorSettingsPage from "../src/pages/doctor/SettingsPage";
@@ -61,6 +62,7 @@ export default function App() {
           <Route index element={<DoctorOverview />} />
           <Route path="appointments" element={<DoctorAppointmentsPage />} />
           <Route path="patients" element={<DoctorPatientsPage />} />
+          <Route path="reports" element={<DoctorReportsPage />} />
           <Route path="availability" element={<DoctorAvailabilityPage />} />
           <Route path="profile" element={<DoctorProfilePage />} />
           <Route path="settings" element={<DoctorSettingsPage />} />

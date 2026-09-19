@@ -12,10 +12,10 @@ const FIELDS = {
     "startTime",
     "slotDate",
   ],
-  time: ["time", "slot", "timeSlot", "appointmentTime"],
+  time: ["appointmentTime", "time", "slot", "timeSlot"],
   doctorId: ["doctorId", "doctorUid"],
   doctorName: ["doctorName", "doctor"],
-  patientName: ["patientName", "userName", "displayName"],
+  patientName: ["patientName", "userName", "userDisplayName", "displayName"],
   type: ["type", "consultationType", "mode"],
   status: ["status", "appointmentStatus"],
 };
@@ -72,11 +72,22 @@ export function mapAppointment(raw, usersById, doctorsById) {
         : "—"),
     dateLabel: date
       ? date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-      : "No date",
+      : "Date not set",
+    // when the booking was made (shown if the appointment has no date yet)
+    bookedAt: toDate(raw.createdAt),
+    bookedLabel:
+      toDate(raw.createdAt)?.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }) ?? null,
+    userId: raw.userId,
     patient:
       pick(raw, FIELDS.patientName) ??
       usersById[raw.userId]?.displayName ??
+      usersById[raw.userId]?.email ??
       "Unknown patient",
+    // a report the patient chose to share with the doctor when booking
+    reportId: raw.reportShared !== false && raw.reportId ? raw.reportId : null,
     doctor:
       pick(raw, FIELDS.doctorName) ??
       doctorsById[doctorId]?.name ??
@@ -97,7 +108,13 @@ export function isSameDay(a, b) {
   );
 }
 
-// filter: 'today' | 'upcoming' | 'all'
+// Clinic bookings are sent without a date; the doctor picks one.
+// true when an appointment still needs that date (and isn't finished or cancelled)
+export const needsDate = (a) =>
+  !a.date &&
+  !["completed", "cancelled", "rejected"].includes(a.status.toLowerCase());
+
+// filter: 'today' | 'upcoming' | 'unscheduled' | 'all'
 export function filterAppointments(list, filter) {
   const now = new Date();
   const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -105,6 +122,7 @@ export function filterAppointments(list, filter) {
   const filtered = list.filter((a) => {
     if (filter === "today") return isSameDay(a.date, now);
     if (filter === "upcoming") return a.date && a.date >= startToday;
+    if (filter === "unscheduled") return needsDate(a);
     return true;
   });
 
