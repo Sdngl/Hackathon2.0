@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../service/analysis_api_service.dart';
 import '../models/assistant_message.dart';
@@ -931,14 +932,7 @@ class _HealthAssistantScreenState extends State<HealthAssistantScreen> {
             _buildPendingSelection(),
 
           if (_isSending)
-            const Padding(
-              padding:
-              EdgeInsets.all(
-                10,
-              ),
-              child:
-              CircularProgressIndicator(),
-            ),
+            const _SevaThinkingIndicator(),
 
           _buildQuickSuggestions(),
 
@@ -1193,15 +1187,6 @@ class _HealthAssistantScreenState extends State<HealthAssistantScreen> {
         ),
         child: Row(
           children: [
-            IconButton(
-              onPressed:
-              _showAttachmentMenu,
-              icon: const Icon(
-                Icons
-                    .add_circle_outline_rounded,
-              ),
-            ),
-
             Expanded(
               child: TextField(
                 controller:
@@ -1286,17 +1271,221 @@ class _MessageBubble
             18,
           ),
         ),
-        child: Text(
+        child: isUser
+            ? Text(
           message.text,
-          style: TextStyle(
-            color: isUser
-                ? Colors.white
-                : const Color(
-                0xFF101828),
-            height: 1.4,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14.5,
+            height: 1.45,
+          ),
+        )
+            : MarkdownBody(
+          data: message.text,
+          selectable: true,
+          styleSheet: MarkdownStyleSheet(
+            p: const TextStyle(
+              color: Color(0xFF101828),
+              fontSize: 14.5,
+              height: 1.5,
+            ),
+            strong: const TextStyle(
+              color: Color(0xFF101828),
+              fontWeight: FontWeight.w800,
+            ),
+            em: const TextStyle(
+              color: Color(0xFF101828),
+              fontStyle: FontStyle.italic,
+            ),
+            h1: const TextStyle(
+              color: Color(0xFF101828),
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              height: 1.3,
+            ),
+            h2: const TextStyle(
+              color: Color(0xFF101828),
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              height: 1.3,
+            ),
+            h3: const TextStyle(
+              color: Color(0xFF101828),
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              height: 1.3,
+            ),
+            listBullet: const TextStyle(
+              color: Color(0xFF07966A),
+              fontWeight: FontWeight.w800,
+            ),
+            blockquote: const TextStyle(
+              color: Color(0xFF667085),
+              fontSize: 14,
+              height: 1.5,
+            ),
+            blockquoteDecoration: BoxDecoration(
+              color: const Color(0xFFF4F7F6),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            code: const TextStyle(
+              color: Color(0xFF101828),
+              fontSize: 13,
+              backgroundColor: Color(0xFFF2F4F7),
+            ),
+            codeblockDecoration: BoxDecoration(
+              color: const Color(0xFFF2F4F7),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            horizontalRuleDecoration: const BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: Color(0xFFE4E7EC),
+                ),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 }
+
+class _SevaThinkingIndicator extends StatefulWidget {
+  const _SevaThinkingIndicator();
+
+  @override
+  State<_SevaThinkingIndicator> createState() =>
+      _SevaThinkingIndicatorState();
+}
+
+class _SevaThinkingIndicatorState
+    extends State<_SevaThinkingIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(
+        milliseconds: 1200,
+      ),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(
+          16,
+          4,
+          16,
+          12,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 11,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(
+            18,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0D000000),
+              blurRadius: 10,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 30,
+              height: 30,
+              decoration: const BoxDecoration(
+                color: Color(0xFFE8F5F1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.auto_awesome_rounded,
+                size: 17,
+                color: Color(0xFF07966A),
+              ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            const Text(
+              'SEVA AI is thinking',
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF344054),
+              ),
+            ),
+            const SizedBox(
+              width: 7,
+            ),
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (
+                  context,
+                  child,
+                  ) {
+                final activeIndex =
+                    (_controller.value * 3).floor() % 3;
+
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(
+                    3,
+                        (index) {
+                      final active =
+                          index == activeIndex;
+
+                      return AnimatedContainer(
+                        duration: const Duration(
+                          milliseconds: 180,
+                        ),
+                        width: active ? 7 : 5,
+                        height: active ? 7 : 5,
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: active
+                              ? const Color(
+                            0xFF07966A,
+                          )
+                              : const Color(
+                            0xFFB7C5C0,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

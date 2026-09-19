@@ -108,6 +108,30 @@ class _MedicineReminderScreenState
     });
   }
 
+  Future<void> _addTime() async {
+    final now = TimeOfDay.now();
+
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: now,
+      helpText: 'Add reminder time',
+    );
+
+    if (selected == null) {
+      return;
+    }
+
+    setState(() {
+      _times.add(selected);
+    });
+  }
+
+  void _removeTime(int index) {
+    setState(() {
+      _times.removeAt(index);
+    });
+  }
+
   Future<void> _saveReminders() async {
     if (_times.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -369,7 +393,7 @@ class _MedicineReminderScreenState
               const SizedBox(height: 5),
 
               const Text(
-                'These times were suggested from the detected instructions. You can change them before saving.',
+                'Review any detected times, or add your own reminder time before saving.',
                 style: TextStyle(
                   fontSize: 13,
                   height: 1.4,
@@ -404,6 +428,45 @@ class _MedicineReminderScreenState
                     label,
                   );
                 },
+              ),
+
+              if (_times.isEmpty) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Text(
+                    'No reminder time was detected. Add a time you want to be reminded.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF667085),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _saving ? null : _addTime,
+                  icon: const Icon(Icons.add_alarm_rounded),
+                  label: const Text('Add reminder time'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF11786D),
+                    minimumSize: const Size.fromHeight(50),
+                    side: const BorderSide(
+                      color: Color(0xFF11786D),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
               ),
 
               const SizedBox(height: 18),
@@ -567,12 +630,21 @@ class _MedicineReminderScreenState
               ],
             ),
           ),
-          TextButton(
-            onPressed: () =>
-                _changeTime(index),
-            child: const Text(
-              'Change',
-            ),
+          Column(
+            children: [
+              TextButton(
+                onPressed: () => _changeTime(index),
+                child: const Text('Change'),
+              ),
+              IconButton(
+                onPressed: () => _removeTime(index),
+                tooltip: 'Remove reminder time',
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Color(0xFF98A2B3),
+                ),
+              ),
+            ],
           ),
         ],
       ),

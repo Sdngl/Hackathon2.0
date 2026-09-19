@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -257,32 +258,66 @@ class _CameraState extends State<Camera>
       return;
     }
 
+    String? recordId;
+    final type = _selectedScanType.name;
+
     try {
       setState(() {
         _isAnalyzing = true;
       });
-
-      final type = _selectedScanType.name;
 
       final imageBase64 =
       await _imageBase64Service.convertToCompressedBase64(
         image,
       );
 
-      final recordId =
-      await _healthScanRepository.createPendingScan(
+      // Backend requires record_id, so create a temporary pending scan first.
+      recordId = await _healthScanRepository.createPendingScan(
         type: type,
         imageBase64: imageBase64,
       );
 
-      final result = await _analysisApiService.analyzeSavedImage(
+      final result =
+      await _analysisApiService.analyzeSavedImage(
         recordId: recordId,
         type: type,
+      );
+      debugPrint('SELECTED TYPE: $type');
+      debugPrint('ANALYSIS RESULT: $result');
+      debugPrint('RETURNED TYPE: ${result['type']}');
+
+      // Only valid scans reach here.
+      await _healthScanRepository.completeScan(
+        type: type,
+        recordId: recordId,
+        analysis: result,
       );
 
       if (!mounted) return;
 
       _handleAnalysisResult(result);
+    } on AnalysisTypeMismatchException catch (e) {
+      // Wrong image type → remove the temporary Firebase document.
+      if (recordId != null) {
+        try {
+          await _healthScanRepository.deleteScan(
+            type: type,
+            recordId: recordId,
+          );
+        } catch (_) {}
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _selectedImage = null;
+      });
+
+      Fluttertoast.showToast(
+        msg: e.userMessage,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
     } on DioException catch (e) {
       if (!mounted) return;
 

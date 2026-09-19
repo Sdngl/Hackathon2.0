@@ -37,6 +37,7 @@ class _AppTextFieldState extends State<AppTextField> {
         borderSide: BorderSide(color: color, width: width),
       );
 
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -88,6 +89,7 @@ class _AppTextFieldState extends State<AppTextField> {
     );
   }
 }
+
 
 /// Big filled teal button with a soft drop shadow.
 class PrimaryButton extends StatelessWidget {
@@ -147,42 +149,49 @@ class PrimaryButton extends StatelessWidget {
 
 /// White outlined "Google" button. Drop google.png into assets/images
 /// to show the real logo; otherwise it falls back to an icon.
+
 class GoogleButton extends StatelessWidget {
   final VoidCallback? onPressed;
-  const GoogleButton({super.key, this.onPressed});
+
+  const GoogleButton({
+    super.key,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 46,
+      height: 54,
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           backgroundColor: Colors.white,
           foregroundColor: AppColors.textDark,
-          side: const BorderSide(color: AppColors.border),
+          side: const BorderSide(
+            color: Color(0xFFE1E7E5),
+          ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/google.png',
-              width: 20,
-              height: 20,
-              errorBuilder: (_, __, ___) => const Icon(
-                Icons.g_mobiledata_rounded,
-                size: 26,
+              'assets/google.png',
+              width: 22,
+              height: 22,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Continue with Google',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
                 color: AppColors.textDark,
               ),
-            ),
-            const SizedBox(width: 10),
-            const Text(
-              'Google',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ],
         ),
