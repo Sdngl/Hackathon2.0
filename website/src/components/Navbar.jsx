@@ -9,6 +9,7 @@ const links = [
   { label: 'AI Assistant', href: '#features' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'Privacy', href: '#privacy' },
+  { label: 'For doctors', href: '#for-doctors' },
 ]
 
 export default function Navbar() {

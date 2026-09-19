@@ -12,11 +12,12 @@ export const ALERT_TYPES = [
   { key: "user", label: "New users" },
   { key: "subscription", label: "Subscriptions" },
   { key: "appointment", label: "Appointments" },
+  { key: "doctor", label: "Doctors" },
 ];
 
 const name = (u) => u.displayName || u.email || "A user";
 
-export function buildAlerts(users, doctors, appointments) {
+export function buildAlerts(users, doctors, appointments, applications = []) {
   const now = new Date();
   const since = new Date(now - WINDOW_DAYS * DAY);
   const recent = (d) => d && d >= since && d <= now;
@@ -98,6 +99,24 @@ export function buildAlerts(users, doctors, appointments) {
       link: "/admin/appointments",
       title: `${a.patient} booked ${a.doctor}`,
       body: `${a.dateLabel} · ${a.time} · ${a.type}`,
+    });
+  }
+
+  // Doctor applications still waiting for a decision
+  for (const app of applications) {
+    const applied = toDate(app.createdAt);
+    if (app.status !== "pending" || !recent(applied)) continue;
+    const specs = Array.isArray(app.specialization)
+      ? app.specialization.join(", ")
+      : app.specialization;
+    alerts.push({
+      id: `apply-${app.id}`,
+      kind: "application",
+      type: "doctor",
+      time: applied,
+      link: "/admin/doctors?tab=applications",
+      title: `${app.name} applied to join as a doctor`,
+      body: [specs, app.licenseNumber].filter(Boolean).join(" · "),
     });
   }
 

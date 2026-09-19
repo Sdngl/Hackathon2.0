@@ -26,6 +26,11 @@ export const ALERT_KINDS = [
     hint: "Someone turns off auto-renew",
   },
   { key: "appointment", label: "New bookings", hint: "A user books a doctor" },
+  {
+    key: "application",
+    label: "Doctor applications",
+    hint: "A doctor applies from the website",
+  },
 ];
 
 export const RANGE_OPTIONS = [7, 30, 90];

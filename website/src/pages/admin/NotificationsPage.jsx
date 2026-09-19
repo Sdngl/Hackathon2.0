@@ -15,6 +15,7 @@ import {
   LoaderCircle,
   Megaphone,
   Send,
+  Stethoscope,
   Trash2,
   UserPlus,
 } from "lucide-react";
@@ -37,6 +38,7 @@ const alertStyle = {
   user: { icon: UserPlus, tint: "bg-brand-50 text-brand-700" },
   subscription: { icon: Crown, tint: "bg-violet-50 text-violet-600" },
   appointment: { icon: CalendarDays, tint: "bg-blue-50 text-blue-600" },
+  doctor: { icon: Stethoscope, tint: "bg-sky-50 text-sky-600" },
   warning: { icon: CircleAlert, tint: "bg-amber-50 text-amber-600" },
 };
 

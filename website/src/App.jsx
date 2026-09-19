@@ -1,10 +1,12 @@
 import { Navigate, Route, Routes } from "react-router";
 import Landing from "../src/pages/Landing";
-import PortalSelect from "./pages/PortalSelect";
+import PortalSelect from "../src/pages/PortalSelect";
+import DoctorApplication from "../src/pages/DoctorApplication";
 import AdminLogin from "../src/pages/admin/Login";
 import Overview from "../src/pages/admin/Overview";
 import DoctorsPage from "../src/pages/admin/DoctorsPage";
 import DoctorDetail from "../src/pages/admin/DoctorDetail";
+import NewDoctor from "../src/pages/admin/NewDoctor";
 import AppointmentsPage from "../src/pages/admin/AppointmentsPage";
 import UsersPage from "../src/pages/admin/UsersPage";
 import UserDetail from "../src/pages/admin/UserDetail";
@@ -16,8 +18,11 @@ import ContentPage from "../src/pages/admin/ContentPage";
 import NotificationsPage from "../src/pages/admin/NotificationsPage";
 import SettingsPage from "../src/pages/admin/SettingsPage";
 import ComingSoon from "../src/pages/admin/ComingSoon";
+import DoctorLogin from "../src/pages/doctor/Login";
+import DoctorHome from "../src/pages/doctor/Home";
 import AdminLayout from "./components/admin/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import DoctorRoute from "./components/DoctorRoute";
 import { adminNav } from "./components/admin/navItems";
 
 // Sidebar pages that are built. Anything not listed here shows "Coming soon".
@@ -37,18 +42,23 @@ const builtPages = {
 export default function App() {
   return (
     <Routes>
+      {/* Public pages */}
       <Route path="/" element={<Landing />} />
       <Route path="/portal" element={<PortalSelect />} />
+      <Route path="/join-doctor" element={<DoctorApplication />} />
       <Route path="/admin/login" element={<AdminLogin />} />
-      <Route
-        path="/doctor/login"
-        element={<ComingSoon title="Doctor portal" standalone />}
-      />
+      <Route path="/doctor/login" element={<DoctorLogin />} />
+
+      {/* Everything under /doctor needs a doctor login */}
+      <Route element={<DoctorRoute />}>
+        <Route path="/doctor" element={<DoctorHome />} />
+      </Route>
 
       {/* Everything under /admin needs an admin login */}
       <Route element={<ProtectedRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Overview />} />
+          <Route path="doctors/new" element={<NewDoctor />} />
           <Route path="doctors/:id" element={<DoctorDetail />} />
           <Route path="users/:id" element={<UserDetail />} />
           {adminNav

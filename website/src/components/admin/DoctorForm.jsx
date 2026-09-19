@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { deleteField } from "firebase/firestore";
 import { LoaderCircle } from "lucide-react";
+import TagInput from "../TagInput";
+import { useAdmin } from "../../context/AdminContext";
+import { SPECIALIZATIONS, SPOKEN_LANGUAGES } from "../../lib/specializations";
 
 // Which form control each doctor field uses
 const TEXT = [
@@ -21,7 +24,15 @@ const NUMBER = [
   "experienceYears",
   "consultationFee",
 ];
-const LIST = ["specialization", "specialties", "languages", "availableSlots"]; // typed as "a, b, c"
+const LIST = ["specialization", "specialties", "languages", "availableSlots"]; // picked with the tag picker
+
+// 8:00 AM to 8:00 PM every 30 minutes, as suggestions for Available slots
+const SLOT_SUGGESTIONS = Array.from({ length: 25 }, (_, i) => {
+  const minutes = 8 * 60 + i * 30;
+  const h = Math.floor(minutes / 60);
+  const m = String(minutes % 60).padStart(2, "0");
+  return `${h % 12 || 12}:${m} ${h < 12 ? "AM" : "PM"}`;
+});
 const TOGGLE = ["verified", "available", "isActive"];
 
 const LABELS = {
@@ -56,8 +67,10 @@ function toForm(doctor) {
   for (const k of NUMBER) form[k] = doctor[k] ?? "";
   for (const k of LIST)
     form[k] = Array.isArray(doctor[k])
-      ? doctor[k].join(", ")
-      : (doctor[k] ?? "");
+      ? doctor[k]
+      : doctor[k]
+        ? [doctor[k]]
+        : [];
   for (const k of TOGGLE) form[k] = !!doctor[k];
   form.about = doctor.about ?? "";
   return form;
@@ -79,10 +92,7 @@ function toFirestore(form, original) {
     else if (had(k)) out[k] = deleteField();
   }
   for (const k of LIST) {
-    const items = form[k]
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const items = form[k];
     if (items.length === 0 && !had(k)) continue;
     // specialization is a plain string in some documents; keep it that way if it was
     const keepString = typeof original[k] === "string" && items.length <= 1;
@@ -105,16 +115,54 @@ function Section({ title, children }) {
   );
 }
 
-export default function DoctorForm({ doctor, onSave, onCancel }) {
+export default function DoctorForm({
+  doctor,
+  onSave,
+  onCancel,
+  submitLabel = "Save changes",
+}) {
   const [form, setForm] = useState(() => toForm(doctor));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  const { doctors } = useAdmin();
+
+  // the built-in list plus anything other doctors already use
+  const specialtySuggestions = useMemo(
+    () =>
+      [
+        ...new Set([
+          ...SPECIALIZATIONS,
+          ...doctors
+            .flatMap((d) => [d.specialization, d.specialties].flat())
+            .filter(Boolean),
+        ]),
+      ].sort(),
+    [doctors],
+  );
 
   const set = (key) => (e) =>
     setForm((f) => ({
       ...f,
       [key]: e.target.type === "checkbox" ? e.target.checked : e.target.value,
     }));
+
+  const tags = (key, suggestions, placeholder, wide) => (
+    <label
+      key={key}
+      htmlFor={`doctor-${key}`}
+      className={`block text-sm font-medium ${wide ? "sm:col-span-2" : ""}`}
+    >
+      {LABELS[key]}
+      <TagInput
+        id={`doctor-${key}`}
+        value={form[key]}
+        onChange={(list) => setForm((f) => ({ ...f, [key]: list }))}
+        suggestions={suggestions}
+        placeholder={placeholder}
+      />
+    </label>
+  );
 
   const field = (key, props = {}) => (
     <label
@@ -161,8 +209,8 @@ export default function DoctorForm({ doctor, onSave, onCancel }) {
       <Section title="Profile">
         {field("name", { required: true })}
         {field("qualification")}
-        {field("specialization", { hint: "comma separated" })}
-        {field("specialties", { hint: "comma separated" })}
+        {tags("specialization", specialtySuggestions, "e.g. Cardiologist")}
+        {tags("specialties", specialtySuggestions, "e.g. Metabolic Health")}
         {field("imageUrl", { wide: true, type: "url" })}
         <label className="block text-sm font-medium sm:col-span-2">
           {LABELS.about}
@@ -190,8 +238,8 @@ export default function DoctorForm({ doctor, onSave, onCancel }) {
         {field("clinicHours")}
         {field("phone", { type: "tel" })}
         {field("email", { type: "email" })}
-        {field("languages", { hint: "comma separated" })}
-        {field("availableSlots", { hint: "e.g. 10:00 AM, 2:00 PM" })}
+        {tags("languages", SPOKEN_LANGUAGES, "e.g. Nepali")}
+        {tags("availableSlots", SLOT_SUGGESTIONS, "e.g. 10:00 AM")}
       </Section>
 
       <Section title="Status">
@@ -231,7 +279,7 @@ export default function DoctorForm({ doctor, onSave, onCancel }) {
           className="flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-800 disabled:opacity-60"
         >
           {saving && <LoaderCircle size={15} className="animate-spin" />}
-          Save changes
+          {submitLabel}
         </button>
       </div>
     </form>

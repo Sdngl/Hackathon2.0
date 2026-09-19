@@ -7,6 +7,7 @@ import useDocument from "../hooks/useDocument";
 import { useAuth } from "./AuthContext";
 import { buildAlerts } from "../lib/alerts";
 import { ADMIN_SETTINGS, mergeAdminSettings } from "../lib/settings";
+import { APPLICATIONS } from "../lib/applications";
 
 // Shared by every admin page: the top bar's date range, the data the search box
 // and exports use, the notification feed, and this admin's saved settings.
@@ -27,6 +28,7 @@ export function AdminProvider({ children }) {
   const users = useCollection("users");
   const doctors = useCollection("doctors");
   const { appointments } = useAppointments();
+  const applications = useCollection(APPLICATIONS);
   const settingsDoc = useDocument(ADMIN_SETTINGS, user?.uid ?? "none");
 
   const settings = useMemo(
@@ -42,10 +44,21 @@ export function AdminProvider({ children }) {
 
   const alerts = useMemo(
     () =>
-      buildAlerts(users.data, doctors.data, appointments).filter(
+      buildAlerts(
+        users.data,
+        doctors.data,
+        appointments,
+        applications.data,
+      ).filter(
         (a) => settings.alertKinds[a.kind] !== false, // types switched off in Settings are hidden
       ),
-    [users.data, doctors.data, appointments, settings.alertKinds],
+    [
+      users.data,
+      doctors.data,
+      appointments,
+      applications.data,
+      settings.alertKinds,
+    ],
   );
   const unreadCount = alerts.filter((a) => a.time.getTime() > lastSeen).length;
 

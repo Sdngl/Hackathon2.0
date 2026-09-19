@@ -22,6 +22,7 @@ import useDocument from "../../hooks/useDocument";
 import { Avatar, Card, StatusPill } from "../../components/admin/ui";
 import Modal from "../../components/admin/Modal";
 import DoctorForm from "../../components/admin/DoctorForm";
+import DoctorLoginCard from "../../components/admin/DoctorLoginCard";
 
 const asList = (v) => (Array.isArray(v) ? v : v ? [v] : []);
 
@@ -257,28 +258,32 @@ export default function DoctorDetail() {
               </Card>
             </div>
 
-            <Card title="Clinic & contact">
-              <div className="mt-4 space-y-4">
-                <Info icon={Building2} label="Hospital" value={hospital} />
-                <Info
-                  icon={Building2}
-                  label="Clinic"
-                  value={doctor.clinicName}
-                />
-                <Info
-                  icon={MapPin}
-                  label="Address"
-                  value={doctor.clinicAddress}
-                />
-                <Info icon={Clock} label="Hours" value={doctor.clinicHours} />
-                <Info icon={Phone} label="Phone" value={doctor.phone} />
-                <Info icon={Mail} label="Email" value={doctor.email} />
-                <div>
-                  <p className="mb-2 text-xs text-gray-500">Languages</p>
-                  <Chips items={asList(doctor.languages)} />
+            <div className="space-y-5">
+              <DoctorLoginCard doctor={doctor} />
+
+              <Card title="Clinic & contact">
+                <div className="mt-4 space-y-4">
+                  <Info icon={Building2} label="Hospital" value={hospital} />
+                  <Info
+                    icon={Building2}
+                    label="Clinic"
+                    value={doctor.clinicName}
+                  />
+                  <Info
+                    icon={MapPin}
+                    label="Address"
+                    value={doctor.clinicAddress}
+                  />
+                  <Info icon={Clock} label="Hours" value={doctor.clinicHours} />
+                  <Info icon={Phone} label="Phone" value={doctor.phone} />
+                  <Info icon={Mail} label="Email" value={doctor.email} />
+                  <div>
+                    <p className="mb-2 text-xs text-gray-500">Languages</p>
+                    <Chips items={asList(doctor.languages)} />
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </div>
           </div>
         </>
       )}

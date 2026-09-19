@@ -1,4 +1,5 @@
 import CTA from "../components/Cta";
+import DoctorCTA from "../components/DoctorCTA";
 import Features from "../components/Features";
 import Footer from "../components/Footer";
 import Hero from "../components/Hero";
@@ -17,6 +18,7 @@ export default function App() {
         <Reminders />
         <HowItWorks />
         <Pricing />
+        <DoctorCTA />
         <CTA />
       </main>
       <Footer />
