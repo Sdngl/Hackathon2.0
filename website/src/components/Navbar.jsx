@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
+import { Link } from 'react-router'
 import Logo from './Logo'
 
 const links = [
@@ -29,7 +30,7 @@ export default function Navbar() {
         </ul>
 
         <div className="hidden items-center gap-5 md:flex">
-          <a href="#" className="text-sm font-semibold">Sign in</a>
+          <Link to="/portal" className="text-sm font-semibold">Sign in</Link>
           <a
             href="#"
             className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-800"
@@ -63,6 +64,9 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
+          <Link to="/portal" className="mb-2 block rounded-full border border-black/10 py-3 text-center text-sm font-semibold">
+            Sign in
+          </Link>
           <a href="#" className="block rounded-full bg-ink py-3 text-center text-sm font-semibold text-white">
             Get the app
           </a>
