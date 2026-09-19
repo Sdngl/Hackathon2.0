@@ -19,8 +19,14 @@ import NotificationsPage from "../src/pages/admin/NotificationsPage";
 import SettingsPage from "../src/pages/admin/SettingsPage";
 import ComingSoon from "../src/pages/admin/ComingSoon";
 import DoctorLogin from "../src/pages/doctor/Login";
-import DoctorHome from "../src/pages/doctor/Home";
+import DoctorOverview from "./pages/doctor/Overview";
+import DoctorAppointmentsPage from "../src/pages/doctor/AppointmentsPage";
+import DoctorPatientsPage from "../src/pages/doctor/PatientsPage";
+import DoctorAvailabilityPage from "../src/pages/doctor/AvailabilityPage";
+import DoctorProfilePage from "../src/pages/doctor/ProfilePage";
+import DoctorSettingsPage from "../src/pages/doctor/SettingsPage";
 import AdminLayout from "./components/admin/AdminLayout";
+import DoctorLayout from "./components/doctor/DoctorLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DoctorRoute from "./components/DoctorRoute";
 import { adminNav } from "./components/admin/navItems";
@@ -51,7 +57,14 @@ export default function App() {
 
       {/* Everything under /doctor needs a doctor login */}
       <Route element={<DoctorRoute />}>
-        <Route path="/doctor" element={<DoctorHome />} />
+        <Route path="/doctor" element={<DoctorLayout />}>
+          <Route index element={<DoctorOverview />} />
+          <Route path="appointments" element={<DoctorAppointmentsPage />} />
+          <Route path="patients" element={<DoctorPatientsPage />} />
+          <Route path="availability" element={<DoctorAvailabilityPage />} />
+          <Route path="profile" element={<DoctorProfilePage />} />
+          <Route path="settings" element={<DoctorSettingsPage />} />
+        </Route>
       </Route>
 
       {/* Everything under /admin needs an admin login */}

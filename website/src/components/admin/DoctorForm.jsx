@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { deleteField } from "firebase/firestore";
 import { LoaderCircle } from "lucide-react";
 import TagInput from "../TagInput";
+import PhotoUpload from "../PhotoUpload";
 import { useAdmin } from "../../context/AdminContext";
 import { SPECIALIZATIONS, SPOKEN_LANGUAGES } from "../../lib/specializations";
 
@@ -211,7 +212,11 @@ export default function DoctorForm({
         {field("qualification")}
         {tags("specialization", specialtySuggestions, "e.g. Cardiologist")}
         {tags("specialties", specialtySuggestions, "e.g. Metabolic Health")}
-        {field("imageUrl", { wide: true, type: "url" })}
+        <PhotoUpload
+          value={form.imageUrl}
+          onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
+          name={form.name || "?"}
+        />
         <label className="block text-sm font-medium sm:col-span-2">
           {LABELS.about}
           <textarea
