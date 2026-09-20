@@ -1,0 +1,32 @@
+
+# Django Backend
+Django==6.1
+djangorestframework==3.18.0
+django-cors-headers==4.9.0
+drf-spectacular==0.30.0
+
+# Firebase Authentication and Database
+firebase-admin==7.6.0
+
+# Gemini AI
+google-genai==2.24.0
+
+# Image Processing
+Pillow==12.3.0
+
+# Environment Variables
+python-dotenv==1.2.1
+
+# HTTP Requests
+requests==2.34.2
+
+# Production Deployment
+gunicorn==25.1.0
+whitenoise==6.12.0
+
+# Database (PostgreSQL, if used)
+dj-database-url==3.1.2
+psycopg[binary]==3.3.4
+
+# JWT Authentication (if used)
+djangorestframework-simplejwt==5.5.1
