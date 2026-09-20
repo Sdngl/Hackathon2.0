@@ -3,8 +3,7 @@ import { Download, ExternalLink, FileText, LoaderCircle } from "lucide-react";
 import Modal from "../admin/Modal";
 import useDocument from "../../hooks/useDocument";
 import { useDoctor } from "../../context/DoctorContext";
-import { toDate } from "../../lib/dashboardStats";
-import { formatDate } from "../../lib/format";
+import ReportValue from "./ReportValue";
 import {
   base64ToObjectUrl,
   findReportFile,
@@ -13,16 +12,24 @@ import {
   reportTitle,
 } from "../../lib/reportFiles";
 
-function showValue(value) {
-  const date = value?.toDate ? toDate(value) : null;
-  if (date) return formatDate(date);
-  if (Array.isArray(value))
-    return value
-      .map((v) => (typeof v === "object" ? JSON.stringify(v) : String(v)))
-      .join(", ");
-  if (typeof value === "object") return JSON.stringify(value, null, 2);
-  if (typeof value === "boolean") return value ? "Yes" : "No";
-  return String(value);
+// objects, lists of objects, or JSON saved as text get the full width
+function isComplex(value) {
+  let v = value;
+  if (typeof v === "string" && /^\s*[[{]/.test(v)) {
+    try {
+      v = JSON.parse(v);
+    } catch {
+      return false;
+    }
+  }
+  if (Array.isArray(v))
+    return v.some((x) => x !== null && typeof x === "object");
+  return (
+    v !== null &&
+    typeof v === "object" &&
+    !(v instanceof Date) &&
+    typeof v.toDate !== "function"
+  );
 }
 
 function FilePreview({ file }) {
@@ -178,17 +185,27 @@ function ReportBody({ appointment, onClose }) {
               <FilePreview file={file} />
               {details.length > 0 && (
                 <dl className="mt-5 divide-y divide-black/5 rounded-2xl border border-black/5">
-                  {details.map(({ key, value }) => (
-                    <div
-                      key={key}
-                      className="grid grid-cols-[150px_1fr] gap-3 px-4 py-2.5 text-sm"
-                    >
-                      <dt className="text-gray-500">{prettyKey(key)}</dt>
-                      <dd className="font-medium break-words whitespace-pre-wrap">
-                        {showValue(value)}
-                      </dd>
-                    </div>
-                  ))}
+                  {details.map(({ key, value }) =>
+                    isComplex(value) ? (
+                      // nested analysis: label on top, full width below
+                      <div key={key} className="px-4 py-3 text-sm">
+                        <dt className="mb-2 font-semibold">{prettyKey(key)}</dt>
+                        <dd>
+                          <ReportValue value={value} />
+                        </dd>
+                      </div>
+                    ) : (
+                      <div
+                        key={key}
+                        className="grid grid-cols-[150px_1fr] gap-3 px-4 py-2.5 text-sm"
+                      >
+                        <dt className="text-gray-500">{prettyKey(key)}</dt>
+                        <dd className="font-medium break-words whitespace-pre-wrap">
+                          <ReportValue value={value} />
+                        </dd>
+                      </div>
+                    ),
+                  )}
                 </dl>
               )}
             </>
